@@ -108,11 +108,11 @@ class BucksBuddyApi(remote.Service):
         p_key=ndb.Key(UserDetails,request.phoneNumber)
         result = p_key.get()
         if request.increment == 1 :
-            setattr(result,balance,result.balance + request.updateAmount)
+            setattr(result,'balance',result.balance + request.updateAmount)
             result.put()
         elif request.increment == 0:
             if result.balance >= request.updateAmount:
-                setattr(result,balance,result.balance - request.updateAmount)
+                setattr(result,'balance',result.balance - request.updateAmount)
                 result.put()
             else:
                 return BooleanMessage(data=False)
