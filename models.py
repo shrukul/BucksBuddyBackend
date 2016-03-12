@@ -29,6 +29,7 @@ class BooleanMessage(messages.Message):
     """BooleanMessage-- outbound Boolean value message"""
     data = messages.BooleanField(1)
 
+
 class UserDetails(ndb.Model):
     """ConferenceQueryForms -- multiple ConferenceQueryForm inbound form message"""
     displayName = ndb.StringProperty()
@@ -46,3 +47,6 @@ class UpdateBalanceForm(messages.Message):
     phoneNumber = messages.StringField(1)
     updateAmount = messages.IntegerField(2)
     increment = messages.IntegerField(3)
+
+class GetBalanceForm(messages.Message):
+    phoneNumber = messages.StringField(1)

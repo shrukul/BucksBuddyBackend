@@ -107,16 +107,30 @@ class BucksBuddyApi(remote.Service):
     def updateBalance(self,request):
         p_key=ndb.Key(UserDetails,request.phoneNumber)
         result = p_key.get()
+        if not result:
+            return BooleanMessage(data=False)
         if request.increment == 1 :
-            setattr(result,'balance',result.balance + request.updateAmount)
+            result.balance = result.balance + request.updateAmount
             result.put()
         elif request.increment == 0:
             if result.balance >= request.updateAmount:
-                setattr(result,'balance',result.balance - request.updateAmount)
+                result.balance = result.balance - request.updateAmount
                 result.put()
             else:
                 return BooleanMessage(data=False)
         return BooleanMessage(data=True)
+
+    @endpoints.method(GetBalanceForm, StringMessage,
+            path='getBalance',
+            http_method='POST', name='getBalance')
+    def getBalance(self,request):
+        p_key=ndb.Key(UserDetails,request.phoneNumber)
+        result = p_key.get()
+        if result:
+            return StringMessage(data=result.balance)
+        else:
+            return StringMessage(data="Phone number does not exist")
+
 
 
 
