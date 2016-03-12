@@ -31,6 +31,7 @@ from models import UserDetails
 from models import UserForm
 from models import UpdateBalanceForm
 from models import GetBalanceForm
+from models import TransferForm
 
 from settings import WEB_CLIENT_ID
 from settings import ANDROID_CLIENT_ID
@@ -98,6 +99,7 @@ class BucksBuddyApi(remote.Service):
             mainEmail=request.mainEmail,
             balance=request.balance,
             phoneNumber=request.phoneNumber,
+            pin=request.pin,
             )
         user.put()  
         return BooleanMessage(data=True)
@@ -132,7 +134,49 @@ class BucksBuddyApi(remote.Service):
         else:
             return StringMessage(data="Phone number does not exist")
 
+    #TODO : Transfer(sender_no, receiver_no, amount)
+
+    @endpoints.method(TransferForm, BooleanMessage,
+            path='transferAmount',
+            http_method='POST', name='transferAmount')
+    def transferAmount(self,request):
+        p_key=ndb.Key(UserDetails,request.sender)
+        send = p_key.get()
+        if not send:
+            return BooleanMessage(data=False)
+        if send.balance < request.amount:
+            return BooleanMessage(data=False)
+
+        p_key2=ndb.Key(UserDetails,request.receiver)
+        recv = p_key2.get()
+        if not recv:
+            return BooleanMessage(data=False)
+
+        api_root = 'https://bucks-buddy.appspot.com/_ah/api'
+        api = 'bucksbuddy'
+        version = 'v1'
+        discovery_url = '%s/discovery/v1/apis/%s/%s/rest' % (api_root, api, version)
+        service = build(api, version, discoveryServiceUrl=discovery_url)
+        response = service.updateBalance({'phoneNumber'=sender,'updateAmount'=request.amount,'increment'=0}).list().execute()
+        """withdraw = updateBalance({'phoneNumber'=sender,'updateAmount'=request.amount,'increment'=0})
+        if withdraw.data==True:
+            deposit = updateBalance({'phoneNumber'=receiver,'updateAmount'=request.amount,'increment'=1})
+            if deposit.data==True:
+                return BooleanMessage(data=True)
+            else:
+                revert = updateBalance({'phoneNumber'=sender,'updateAmount'=request.amount,'increment'=1})
+                return BooleanMessage(data=False)
+        else:
+            return BooleanMessage(data=False)
+        """
 
 
+
+    #TODO : Billshare(sender_no, receiver_no, sender_pin, amount)
+    #TODO : Billpay(sender_no,receiver_name,receiver_pin,amount)
+    #TODO : GetField(field,input)
+    #TODO : CheckLogin(phone_no,pin)   
+
+    
 
 api = endpoints.api_server([BucksBuddyApi]) # register API

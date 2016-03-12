@@ -36,12 +36,14 @@ class UserDetails(ndb.Model):
     mainEmail = ndb.StringProperty()
     phoneNumber = ndb.StringProperty()
     balance = ndb.IntegerProperty()
+    pin = ndb.IntegerProperty()
 
 class UserForm(messages.Message):
     displayName = messages.StringField(1)
     mainEmail = messages.StringField(2)
     phoneNumber = messages.StringField(3)
     balance = messages.IntegerField(4)
+    pin = messages.IntegerField(5)
 
 class UpdateBalanceForm(messages.Message):
     phoneNumber = messages.StringField(1)
@@ -50,3 +52,8 @@ class UpdateBalanceForm(messages.Message):
 
 class GetBalanceForm(messages.Message):
     phoneNumber = messages.StringField(1)
+
+class TransferForm(messages.Message):
+    sender = messages.StringField(1)
+    receiver = messages.StringField(2)
+    amount = messages.IntegerField(3)
