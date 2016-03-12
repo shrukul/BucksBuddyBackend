@@ -28,11 +28,14 @@ from models import ConflictException
 from models import StringMessage
 from models import BooleanMessage
 from models import UserDetails
+from models import MerchantDetails
 from models import UserForm
 from models import UpdateBalanceForm
 from models import GetBalanceForm
 from models import TransferForm
 from models import BillShareForm
+from models import MerchantForm
+from models import BillPayForm
 
 from settings import WEB_CLIENT_ID
 from settings import ANDROID_CLIENT_ID
@@ -105,6 +108,23 @@ class BucksBuddyApi(remote.Service):
         user.put()  
         return BooleanMessage(data=True)
 
+
+    @endpoints.method(MerchantForm, BooleanMessage,
+            path='registerMerchant',
+            http_method='POST', name='registerMerchant')
+    def registerMerchant(self, request):    
+        p_key=ndb.Key(MerchantDetails,request.displayName)
+        merchant = MerchantDetails(
+            key=p_key,
+            displayName=request.displayName,
+            balance=request.balance,
+            phoneNumber=request.phoneNumber,
+            pin=request.pin,
+            )
+        merchant.put()  
+        return BooleanMessage(data=True)
+            
+
     @endpoints.method(UpdateBalanceForm, BooleanMessage,
             path='updateBalance',
             http_method='POST', name='updateBalance')
@@ -157,8 +177,6 @@ class BucksBuddyApi(remote.Service):
         recv.put()
         return BooleanMessage(data=True)
 
-    #TODO : Billshare(sender_no, receiver_no, sender_pin, amount)
-
     @endpoints.method(BillShareForm, BooleanMessage,
             path='billShare',
             http_method='POST', name='billShare')
@@ -183,9 +201,31 @@ class BucksBuddyApi(remote.Service):
         recv.put()
         return BooleanMessage(data=True)
 
-        
+    @endpoints.method(BillPayForm, BooleanMessage,
+            path='billPay',
+            http_method='POST', name='billPay')
+    def billPay(self,request):
+        p_key = ndb.Key(UserDetails,request.sender)
+        send = p_key.get()
+        if not send:
+            return BooleanMessage(data=False)
+        if send.pin != request.sender_pin:
+            return BooleanMessage(data=False)
+        if send.balance < request.amount:
+            return BooleanMessage(data=False)
 
-    #TODO : Billpay(sender_no,receiver_name,receiver_pin,amount)
+        p_key2=ndb.Key(MerchantDetails,request.receiver)
+        recv = p_key2.get()
+        if not recv:
+            return BooleanMessage(data=False)
+        if recv.pin != request.receiver_pin:
+            return BooleanMessage(data=False)
+        send.balance = send.balance - request.amount
+        send.put()
+        recv.balance = recv.balance + request.amount
+        recv.put()
+        return BooleanMessage(data=True)
+
     #TODO : GetField(field,input)
     #TODO : CheckLogin(phone_no,pin)   
 

@@ -17,6 +17,21 @@ import endpoints
 from protorpc import messages
 from google.appengine.ext import ndb
 
+
+class UserDetails(ndb.Model):
+    displayName = ndb.StringProperty()
+    mainEmail = ndb.StringProperty()
+    phoneNumber = ndb.StringProperty()
+    balance = ndb.IntegerProperty()
+    pin = ndb.IntegerProperty()
+
+class MerchantDetails(ndb.Model):
+    displayName = ndb.StringProperty()
+    phoneNumber = ndb.StringProperty()
+    balance = ndb.IntegerProperty()
+    pin = ndb.IntegerProperty()
+
+
 class ConflictException(endpoints.ServiceException):
     """ConflictException -- exception mapped to HTTP 409 response"""
     http_status = httplib.CONFLICT
@@ -30,17 +45,17 @@ class BooleanMessage(messages.Message):
     data = messages.BooleanField(1)
 
 
-class UserDetails(ndb.Model):
-    """ConferenceQueryForms -- multiple ConferenceQueryForm inbound form message"""
-    displayName = ndb.StringProperty()
-    mainEmail = ndb.StringProperty()
-    phoneNumber = ndb.StringProperty()
-    balance = ndb.IntegerProperty()
-    pin = ndb.IntegerProperty()
 
 class UserForm(messages.Message):
     displayName = messages.StringField(1)
     mainEmail = messages.StringField(2)
+    phoneNumber = messages.StringField(3)
+    balance = messages.IntegerField(4)
+    pin = messages.IntegerField(5)
+
+
+class MerchantForm(messages.Message):
+    displayName = messages.StringField(1)
     phoneNumber = messages.StringField(3)
     balance = messages.IntegerField(4)
     pin = messages.IntegerField(5)
@@ -63,3 +78,10 @@ class BillShareForm(messages.Message):
     receiver = messages.StringField(2)
     amount = messages.IntegerField(3)
     sender_pin = messages.IntegerField(4)
+
+class BillPayForm(messages.Message):
+    sender = messages.StringField(1)
+    receiver = messages.StringField(2)
+    amount = messages.IntegerField(3)
+    sender_pin = messages.IntegerField(4)
+    receiver_pin = messages.IntegerField(5)
