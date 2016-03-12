@@ -57,3 +57,9 @@ class TransferForm(messages.Message):
     sender = messages.StringField(1)
     receiver = messages.StringField(2)
     amount = messages.IntegerField(3)
+
+class BillShareForm(messages.Message):
+    sender = messages.StringField(1)
+    receiver = messages.StringField(2)
+    amount = messages.IntegerField(3)
+    sender_pin = messages.IntegerField(4)

@@ -32,6 +32,7 @@ from models import UserForm
 from models import UpdateBalanceForm
 from models import GetBalanceForm
 from models import TransferForm
+from models import BillShareForm
 
 from settings import WEB_CLIENT_ID
 from settings import ANDROID_CLIENT_ID
@@ -134,8 +135,6 @@ class BucksBuddyApi(remote.Service):
         else:
             return StringMessage(data="Phone number does not exist")
 
-    #TODO : Transfer(sender_no, receiver_no, amount)
-
     @endpoints.method(TransferForm, BooleanMessage,
             path='transferAmount',
             http_method='POST', name='transferAmount')
@@ -159,6 +158,33 @@ class BucksBuddyApi(remote.Service):
         return BooleanMessage(data=True)
 
     #TODO : Billshare(sender_no, receiver_no, sender_pin, amount)
+
+    @endpoints.method(BillShareForm, BooleanMessage,
+            path='billShare',
+            http_method='POST', name='billShare')
+    def billShare(self,request):
+        p_key = ndb.Key(UserDetails,request.sender)
+        send = p_key.get()
+        if not send:
+            return BooleanMessage(data=False)
+        if send.pin != request.sender_pin:
+            return BooleanMessage(data=False)
+        if send.balance < request.amount:
+            return BooleanMessage(data=False)
+
+        p_key2=ndb.Key(UserDetails,request.receiver)
+        recv = p_key2.get()
+        if not recv:
+            return BooleanMessage(data=False)
+
+        send.balance = send.balance - request.amount
+        send.put()
+        recv.balance = recv.balance + request.amount
+        recv.put()
+        return BooleanMessage(data=True)
+
+        
+
     #TODO : Billpay(sender_no,receiver_name,receiver_pin,amount)
     #TODO : GetField(field,input)
     #TODO : CheckLogin(phone_no,pin)   
