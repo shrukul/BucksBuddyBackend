@@ -30,6 +30,7 @@ from models import BooleanMessage
 from models import UserDetails
 from models import UserForm
 from models import UpdateBalanceForm
+from models import GetBalanceForm
 
 from settings import WEB_CLIENT_ID
 from settings import ANDROID_CLIENT_ID
@@ -127,7 +128,7 @@ class BucksBuddyApi(remote.Service):
         p_key=ndb.Key(UserDetails,request.phoneNumber)
         result = p_key.get()
         if result:
-            return StringMessage(data=result.balance)
+            return StringMessage(data=str(result.balance))
         else:
             return StringMessage(data="Phone number does not exist")
 
