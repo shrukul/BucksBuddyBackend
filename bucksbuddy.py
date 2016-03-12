@@ -29,6 +29,7 @@ from models import StringMessage
 from models import BooleanMessage
 from models import UserDetails
 from models import UserForm
+from models import UpdateBalanceForm
 
 from settings import WEB_CLIENT_ID
 from settings import ANDROID_CLIENT_ID
@@ -84,6 +85,7 @@ CONF_POST_REQUEST = endpoints.ResourceContainer(
 class BucksBuddyApi(remote.Service):
     """BucksBuddy API v0.1"""
 
+    """ """
     @endpoints.method(UserForm, BooleanMessage,
             path='registerUser',
             http_method='POST', name='registerUser')
@@ -98,7 +100,23 @@ class BucksBuddyApi(remote.Service):
             )
         user.put()  
         return BooleanMessage(data=True)
-        
+
+    @endpoints.method(UpdateBalanceForm, BooleanMessage,
+            path='updateBalance',
+            http_method='POST', name='updateBalance')
+    def updateBalance(self,request):
+        p_key=ndb.Key(UserDetails,request.phoneNumber)
+        result = p_key.get()
+        if request.increment == 1 :
+            setattr(result,balance,result.balance + request.updateAmount)
+            result.put()
+        elif request.increment == 0:
+            if result.balance >= request.updateAmount:
+                setattr(result,balance,result.balance - request.updateAmount)
+                result.put()
+            else:
+                return BooleanMessage(data=False)
+        return BooleanMessage(data=True)
 
 
 

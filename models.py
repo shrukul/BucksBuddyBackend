@@ -41,4 +41,7 @@ class UserForm(messages.Message):
     mainEmail = messages.StringField(2)
     phoneNumber = messages.StringField(3)
     balance = messages.IntegerField(4)
-    
+
+class UpdateBalanceForm(messages.Message):
+    phoneNumber = messages.StringField(1)
+    updateAmount = messages.IntegerField(2)
