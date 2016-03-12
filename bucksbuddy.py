@@ -152,25 +152,11 @@ class BucksBuddyApi(remote.Service):
         if not recv:
             return BooleanMessage(data=False)
 
-        api_root = 'https://bucks-buddy.appspot.com/_ah/api'
-        api = 'bucksbuddy'
-        version = 'v1'
-        discovery_url = '%s/discovery/v1/apis/%s/%s/rest' % (api_root, api, version)
-        service = build(api, version, discoveryServiceUrl=discovery_url)
-        response = service.updateBalance({'phoneNumber'=sender,'updateAmount'=request.amount,'increment'=0}).list().execute()
-        """withdraw = updateBalance({'phoneNumber'=sender,'updateAmount'=request.amount,'increment'=0})
-        if withdraw.data==True:
-            deposit = updateBalance({'phoneNumber'=receiver,'updateAmount'=request.amount,'increment'=1})
-            if deposit.data==True:
-                return BooleanMessage(data=True)
-            else:
-                revert = updateBalance({'phoneNumber'=sender,'updateAmount'=request.amount,'increment'=1})
-                return BooleanMessage(data=False)
-        else:
-            return BooleanMessage(data=False)
-        """
-
-
+        send.balance = send.balance - request.amount
+        send.put()
+        recv.balance = recv.balance + request.amount
+        recv.put()
+        return BooleanMessage(data=True)
 
     #TODO : Billshare(sender_no, receiver_no, sender_pin, amount)
     #TODO : Billpay(sender_no,receiver_name,receiver_pin,amount)
