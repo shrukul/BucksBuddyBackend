@@ -45,3 +45,4 @@ class UserForm(messages.Message):
 class UpdateBalanceForm(messages.Message):
     phoneNumber = messages.StringField(1)
     updateAmount = messages.IntegerField(2)
+    increment = messages.IntegerField(3)
