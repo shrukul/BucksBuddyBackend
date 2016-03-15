@@ -1,0 +1,29 @@
+application: bucks-buddy
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+handlers:       # static then dynamic
+
+- url: /_ah/spi/.*
+  script: bucksbuddy.api
+
+- url: /
+  static_files: easeon1/mainpage.html
+  upload: easeon1/mainpage.html
+
+- url: /payu
+  static_files: payu/PayUMoney_form.php
+  upload: payu/PayUMoney_form.php
+
+libraries:
+
+- name: webapp2
+  version: latest
+
+- name: endpoints
+  version: latest
+
+# pycrypto library used for OAuth2 (req'd for authenticated APIs)
+- name: pycrypto
+  version: latest

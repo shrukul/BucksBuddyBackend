@@ -1,0 +1,174 @@
+#jquery-script-menu {
+position: fixed;
+height: 90px;
+width: 100%;
+top: 0;
+left: 0;
+border-top: 5px solid #316594;
+background: #fff;
+-moz-box-shadow: 0 2px 3px 0px rgba(0, 0, 0, 0.16);
+-webkit-box-shadow: 0 2px 3px 0px rgba(0, 0, 0, 0.16);
+box-shadow: 0 2px 3px 0px rgba(0, 0, 0, 0.16);
+z-index: 999999;
+padding: 10px 0;
+-webkit-box-sizing:content-box;
+-moz-box-sizing:content-box;
+box-sizing:content-box;
+}
+
+.jquery-script-center {
+width: 960px;
+margin: 0 auto;
+}
+.jquery-script-center ul {
+width: 212px;
+float:left;
+line-height:45px;
+margin:0;
+padding:0;
+list-style:none;
+}
+.jquery-script-center a {
+	text-decoration:none;
+}
+.jquery-script-ads {
+width: 728px;
+height:90px;
+float:right;
+}
+.jquery-script-clear {
+clear:both;
+height:0;
+}
+
+/*custom font*/
+
+@import url(http://fonts.googleapis.com/css?family=Montserrat);
+/*basic reset*/
+* {
+margin: 0;
+padding: 0;
+}
+html {
+height: 100%;
+/*Image only BG fallback*/
+
+/*background = gradient + image pattern combo*/
+
+}
+body {
+font-family: montserrat, arial, verdana;
+}
+/*form styles*/
+#msform {
+width: 800px;
+margin: 50px auto;
+text-align: center;
+position: relative;
+}
+#msform fieldset {
+background: white;
+border: 0 none;
+border-radius: 3px;
+box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.4);
+padding: 20px 30px;
+box-sizing: border-box;
+width: 80%;
+margin: 0 10%;
+/*stacking fieldsets above each other*/
+position: relative;
+}
+/*Hide all except first fieldset*/
+#msform fieldset:not(:first-of-type) {
+display: none;
+}
+/*inputs*/
+#msform input, #msform textarea {
+padding: 15px;
+border: 2px solid #645f99;
+border-radius: 6px;
+margin-bottom: 10px;
+width: 100%;
+box-sizing: border-box;
+font-family: montserrat;
+color: #2C3E50;
+font-size: 18px;
+}
+/*buttons*/
+#msform .action-button {
+width: 180px;
+background: #645f99;
+font-weight: bold;
+color: white;
+border: 0 none;
+border-radius: 1px;
+cursor: pointer;
+padding: 10px 5px;
+margin: 10px 5px;
+}
+#msform .action-button:hover, #msform .action-button:focus {
+box-shadow: 0 0 0 2px white, 0 0 0 3px #46426b;
+}
+/*headings*/
+.fs-title {
+font-size: 21px;
+font-weight: bold;
+text-transform: uppercase;
+color: #645F99;
+margin-bottom: 20px;
+}
+.fs-subtitle {
+font-weight: normal;
+font-size: 13px;
+color: #666;
+margin-bottom: 20px;
+}
+/*progressbar*/
+#progressbar {
+margin-bottom: 30px;
+overflow: hidden;
+/*CSS counters to number the steps*/
+counter-reset: step;
+}
+#progressbar li {
+list-style-type: none;
+color: white;
+text-transform: uppercase;
+font-size: 9px;
+width: 33.33%;
+float: left;
+position: relative;
+}
+#progressbar li:before {
+content: counter(step);
+counter-increment: step;
+width: 20px;
+line-height: 20px;
+display: block;
+font-size: 10px;
+color: #333;
+background: white;
+border-radius: 3px;
+margin: 0 auto 5px auto;
+}
+/*progressbar connectors*/
+#progressbar li:after {
+content: '';
+width: 100%;
+height: 2px;
+background: white;
+position: absolute;
+left: -50%;
+top: 9px;
+z-index: -1; /*put it behind the numbers*/
+}
+#progressbar li:first-child:after {
+/*connector not needed before the first step*/
+content: none;
+}
+/*marking active/completed steps green*/
+/*The number of the step and the connector before it = green*/
+#progressbar li.active:before, #progressbar li.active:after {
+background: #27AE60;
+color: white;
+}
