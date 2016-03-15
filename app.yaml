@@ -2,11 +2,15 @@ application: bucks-buddy
 version: 1
 runtime: python27
 api_version: 1
-threadsafe: true
+threadsafe: yes
 handlers:       # static then dynamic
 
 - url: /_ah/spi/.*
   script: bucksbuddy.api
+
+- url: /
+  static_files: easeon1/mainpage.html
+  upload: easeon1/mainpage.html
 
 libraries:
 

@@ -53,6 +53,9 @@ class UserForm(messages.Message):
     balance = messages.IntegerField(4)
     pin = messages.IntegerField(5)
 
+class LoginForm(messages.Message):
+    phoneNumber = messages.StringField(1)
+    pin = messages.IntegerField(2)
 
 class MerchantForm(messages.Message):
     displayName = messages.StringField(1)
