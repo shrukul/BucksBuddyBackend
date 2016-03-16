@@ -88,3 +88,10 @@ class BillPayForm(messages.Message):
     amount = messages.IntegerField(3)
     sender_pin = messages.IntegerField(4)
     receiver_pin = messages.IntegerField(5)
+
+class ProfileForm(messages.Message):
+    displayName = messages.StringField(1)
+    mainEmail = messages.StringField(2)
+    phoneNumber = messages.StringField(3)
+    balance = messages.IntegerField(4)
+    success = messages.IntegerField(5)

@@ -37,6 +37,7 @@ from models import BillShareForm
 from models import MerchantForm
 from models import BillPayForm
 from models import LoginForm
+from models import ProfileForm
 
 from settings import WEB_CLIENT_ID
 from settings import ANDROID_CLIENT_ID
@@ -110,17 +111,25 @@ class BucksBuddyApi(remote.Service):
         return BooleanMessage(data=True)
 
 
-    @endpoints.method(LoginForm, BooleanMessage,
+    @endpoints.method(LoginForm, ProfileForm,
             path='loginUser',
             http_method='POST', name='loginUser')
     def loginUser(self, request):    
         p_key = ndb.Key(UserDetails,request.phoneNumber)
         user = p_key.get()
-        if not user:
-            return BooleanMessage(data=False)
-        if user.pin != request.pin:
-            return BooleanMessage(data=False)  
-        return BooleanMessage(data=True)
+        succ = 1
+        if user is None:
+            succ = 0
+        elif user.pin != request.pin:
+            succ = 2
+        prof = ProfileForm()
+        if succ == 1:
+            prof.displayName = user.displayName
+            prof.mainEmail = user.mainEmail
+            prof.phoneNumber = user.phoneNumber
+            prof.balance = user.balance
+        prof.success = succ
+        return prof
 
 
     @endpoints.method(MerchantForm, BooleanMessage,
