@@ -38,11 +38,17 @@ from models import MerchantForm
 from models import BillPayForm
 from models import LoginForm
 from models import ProfileForm
+from models import GoogleLoginForm
+from models import TransactionForm
+from models import CreditForm
 
 from settings import WEB_CLIENT_ID
 from settings import ANDROID_CLIENT_ID
 from settings import IOS_CLIENT_ID
 from settings import ANDROID_AUDIENCE
+
+import random
+import google.appengine.ext.db
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -94,21 +100,34 @@ class BucksBuddyApi(remote.Service):
     """BucksBuddy API v0.1"""
 
     """ """
-    @endpoints.method(UserForm, BooleanMessage,
+    @endpoints.method(UserForm, ProfileForm,
             path='registerUser',
             http_method='POST', name='registerUser')
     def registerUser(self, request):    
         p_key=ndb.Key(UserDetails,request.phoneNumber)
+        succ = 1
         user = UserDetails(
             key=p_key,
             displayName=request.displayName,
             mainEmail=request.mainEmail,
-            balance=request.balance,
+            balance=0,
             phoneNumber=request.phoneNumber,
-            pin=request.pin,
+            pin=random.randint(999, 9999),
+            uri=request.uri,
             )
-        user.put()  
-        return BooleanMessage(data=True)
+        try:
+            user.put()
+        except datastore_errors.DuplicatePropertyError:
+            succ = 0
+        prof = ProfileForm()
+        if succ == 1:
+            prof.displayName = user.displayName
+            prof.uri = user.uri
+            prof.mainEmail = user.mainEmail
+            prof.balance = user.balance
+            prof.phoneNumber = user.phoneNumber
+        prof.success = succ
+        return prof
 
 
     @endpoints.method(LoginForm, ProfileForm,
@@ -128,6 +147,26 @@ class BucksBuddyApi(remote.Service):
             prof.mainEmail = user.mainEmail
             prof.phoneNumber = user.phoneNumber
             prof.balance = user.balance
+            prof.uri = user.uri
+        prof.success = succ
+        return prof
+
+    @endpoints.method(GoogleLoginForm, ProfileForm,
+            path='googleLoginUser',
+            http_method='POST', name='googleLoginUser')
+    def googleLoginUser(self, request):    
+        qry = UserDetails.GoogleLogin(request.mainEmail,request.uri)
+        succ = 1
+        user = qry.get();
+        prof = ProfileForm()
+        if user is None:
+            succ = 0
+        elif succ == 1:
+            prof.displayName = user.displayName
+            prof.mainEmail = user.mainEmail
+            prof.phoneNumber = user.phoneNumber
+            prof.balance = user.balance
+            prof.uri = user.uri
         prof.success = succ
         return prof
 
@@ -200,55 +239,95 @@ class BucksBuddyApi(remote.Service):
         recv.put()
         return BooleanMessage(data=True)
 
-    @endpoints.method(BillShareForm, BooleanMessage,
+    @endpoints.method(BillShareForm, TransactionForm,
             path='billShare',
             http_method='POST', name='billShare')
     def billShare(self,request):
         p_key = ndb.Key(UserDetails,request.sender)
         send = p_key.get()
+        succ = 1
         if not send:
-            return BooleanMessage(data=False)
-        if send.pin != request.sender_pin:
-            return BooleanMessage(data=False)
-        if send.balance < request.amount:
-            return BooleanMessage(data=False)
+            succ = 0
+        elif send.pin != request.sender_pin:
+            succ = 2
+        if succ == 1 and send.balance < request.amount:
+            succ = 3
 
         p_key2=ndb.Key(UserDetails,request.receiver)
         recv = p_key2.get()
         if not recv:
-            return BooleanMessage(data=False)
+            succ = 4
 
-        send.balance = send.balance - request.amount
-        send.put()
-        recv.balance = recv.balance + request.amount
-        recv.put()
-        return BooleanMessage(data=True)
+        trans = TransactionForm()
 
-    @endpoints.method(BillPayForm, BooleanMessage,
+        if succ == 1:
+            trans.displayName = recv.displayName
+            trans.mainEmail = recv.mainEmail
+            trans.phoneNumber = recv.phoneNumber
+            send.balance = send.balance - request.amount
+            send.put()
+            recv.balance = recv.balance + request.amount
+            recv.put()
+            trans.balance = send.balance
+            trans.amount = request.amount
+
+        trans.success = succ
+        return trans
+
+    @endpoints.method(BillPayForm, TransactionForm,
             path='billPay',
             http_method='POST', name='billPay')
     def billPay(self,request):
         p_key = ndb.Key(UserDetails,request.sender)
         send = p_key.get()
+        succ = 1
         if not send:
-            return BooleanMessage(data=False)
-        if send.pin != request.sender_pin:
-            return BooleanMessage(data=False)
-        if send.balance < request.amount:
-            return BooleanMessage(data=False)
+            succ = 0
+        elif send.pin != request.sender_pin:
+            succ = 2
+        if succ == 1 and send.balance < request.amount:
+            succ = 3
 
         p_key2=ndb.Key(MerchantDetails,request.receiver)
         recv = p_key2.get()
         if not recv:
-            return BooleanMessage(data=False)
-        if recv.pin != request.receiver_pin:
-            return BooleanMessage(data=False)
-        send.balance = send.balance - request.amount
-        send.put()
-        recv.balance = recv.balance + request.amount
-        recv.put()
-        return BooleanMessage(data=True)
+            succ = 4
+        if succ == 1 and recv.pin != request.receiver_pin:
+            succ = 5
 
+        trans = TransactionForm()
+
+        if succ == 1:
+            trans.displayName = recv.displayName
+            trans.phoneNumber = recv.phoneNumber
+            send.balance = send.balance - request.amount
+            send.put()
+            recv.balance = recv.balance + request.amount
+            recv.put()
+            trans.balance = send.balance
+            trans.amount = request.amount
+        trans.success = succ
+        return trans
+
+    @endpoints.method(CreditForm, TransactionForm,
+            path='credit',
+            http_method='POST', name='credit')
+    def credit(self,request):
+        p_key = ndb.Key(UserDetails,request.sender)
+        send = p_key.get()
+        succ = 1
+        if not send:
+            succ = 0
+
+        trans = TransactionForm()
+
+        if succ == 1:
+            send.balance = send.balance + request.amount
+            send.put()
+            trans.balance = send.balance
+            trans.amount = request.amount
+        trans.success = succ
+        return trans
     #TODO : GetField(field,input)
     #TODO : CheckLogin(phone_no,pin)   
 
