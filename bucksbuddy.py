@@ -41,6 +41,7 @@ from models import ProfileForm
 from models import GoogleLoginForm
 from models import TransactionForm
 from models import CreditForm
+from models import GCMForm
 
 from settings import WEB_CLIENT_ID
 from settings import ANDROID_CLIENT_ID
@@ -48,6 +49,8 @@ from settings import IOS_CLIENT_ID
 from settings import ANDROID_AUDIENCE
 
 import random
+import json
+import urllib2
 import google.appengine.ext.db
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
@@ -89,6 +92,15 @@ CONF_POST_REQUEST = endpoints.ResourceContainer(
     UserForm,
     websafeConferenceKey=messages.StringField(1),
 )
+
+def SendGCM(regid, msg, msgType, balance):
+        url = 'https://android.googleapis.com/gcm/send'
+        data = json.dumps({ "registration_ids" : [""+ regid +""], "data" : { "message" : msg, "type" : msgType, "balance" : balance} })
+        headers = {'Content-Type' : 'application/json', 'Authorization' : 'key=AIzaSyB4-yMAlsh874AGjTqAuQik7mCDRWjq5BU'}
+        request = urllib2.Request(url, data, headers)
+        response = urllib2.urlopen(request)
+        html = response.read()
+        print html
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -270,7 +282,8 @@ class BucksBuddyApi(remote.Service):
             recv.put()
             trans.balance = send.balance
             trans.amount = request.amount
-
+            SendGCM(send.regid,request.amount,-1,send.balance)
+            SendGCM(recv.regid,request.amount,1,recv.balance)
         trans.success = succ
         return trans
 
@@ -306,6 +319,7 @@ class BucksBuddyApi(remote.Service):
             recv.put()
             trans.balance = send.balance
             trans.amount = request.amount
+            SendGCM(send.regid,request.amount,-1,send.balance)
         trans.success = succ
         return trans
 
@@ -326,8 +340,29 @@ class BucksBuddyApi(remote.Service):
             send.put()
             trans.balance = send.balance
             trans.amount = request.amount
+            SendGCM(send.regid, request.amount, 1, send.balance)
         trans.success = succ
         return trans
+
+    @endpoints.method(GCMForm, BooleanMessage,
+            path='registerGCM',
+            http_method='POST', name='registerGCM')
+    def registerGCM(self,request):
+        p_key = ndb.Key(UserDetails,request.sender)
+        user = p_key.get()
+        succ = 1
+        if not user:
+            succ = 0
+
+        if succ == 1:
+            user.regid = request.regid
+            user.put()
+        
+        if(succ == 0):
+            result = BooleanMessage(data=False)
+        else:
+            result = BooleanMessage(data=True)
+        return result
     #TODO : GetField(field,input)
     #TODO : CheckLogin(phone_no,pin)   
 

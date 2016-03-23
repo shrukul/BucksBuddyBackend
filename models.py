@@ -25,6 +25,7 @@ class UserDetails(ndb.Model):
     balance = ndb.IntegerProperty()
     pin = ndb.IntegerProperty()
     uri = ndb.StringProperty()
+    regid = ndb.StringProperty()
 
     @classmethod
     def GoogleLogin(cls, mainEmail, uri):
@@ -116,4 +117,8 @@ class TransactionForm(messages.Message):
 
 class CreditForm(messages.Message):
     sender = messages.StringField(1)
-    amount = messages.IntegerField(3)
+    amount = messages.IntegerField(2)
+
+class GCMForm(messages.Message):
+    sender = messages.StringField(1)
+    regid = messages.StringField(2)
