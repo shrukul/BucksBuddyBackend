@@ -124,7 +124,7 @@ class BucksBuddyApi(remote.Service):
             mainEmail=request.mainEmail,
             balance=0,
             phoneNumber=request.phoneNumber,
-            pin=random.randint(999, 9999),
+            pin=request.pin,
             uri=request.uri,
             )
         try:
